@@ -20,18 +20,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LiveData;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.airbnb.lottie.LottieAnimationView;
 
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.zip.Inflater;
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
     RecyclerView recyclerView;
     static LottieAnimationView  progressBar;
     static LottieAnimationView tv_error;
+    static SwipeRefreshLayout swipeRefreshLayout;
     static TextView error_message;
     String searchText = "intitle";
    static boolean isOnline;
@@ -41,18 +44,17 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         progressBar.setVisibility(View.INVISIBLE);
         error_message.setVisibility(View.VISIBLE);
         tv_error.setVisibility(View.VISIBLE);
+        swipeRefreshLayout.setRefreshing(false);
+
         Log.d("Error", "Error Occoured Here");
 
     }
-
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu,menu);
-
         MenuItem item = menu.findItem(R.id.search_bar);
-
         final SearchView searchView = (SearchView) item.getActionView();
         searchView.setQueryHint("Name, Title, Author ");
         searchView.setOnQueryTextListener(this);
@@ -67,10 +69,29 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         progressBar = findViewById(R.id.progressBar);
         tv_error = findViewById(R.id.tv_error);
         error_message = findViewById(R.id.error_messaage);
+        swipeRefreshLayout = findViewById(R.id.swipeContainer);
         final int columns = getResources().getInteger(R.integer.column_number);
         recyclerView.setLayoutManager(new GridLayoutManager(this, columns));
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                try {
+                    String[] arrayOfTitle = getApplicationContext().getResources().getStringArray(R.array.title_array);
+                    String randStr = arrayOfTitle[new Random().nextInt(arrayOfTitle.length)];
+
+                    URL bookUrl = ApiUtils.buildUrl(randStr);
+                    new BooksQueryTask().execute(bookUrl);
+                } catch (Exception e) {
+                    Log.d("Error", e.getMessage());
+                    badNetwork();
+                }
+            }
+        });
+
         try {
-            URL bookUrl = ApiUtils.buildUrl("cooking");
+            String[] arrayOfTitle = getApplicationContext().getResources().getStringArray(R.array.title_array);
+             String randStr = arrayOfTitle[new Random().nextInt(arrayOfTitle.length)];
+            URL bookUrl = ApiUtils.buildUrl(randStr);
             new BooksQueryTask().execute(bookUrl);
         } catch (Exception e) {
             Log.d("Error", e.getMessage());
@@ -148,7 +169,6 @@ return false;
 
             } else {
                 ArrayList<Book> books = ApiUtils.getBooksFromJson(s);
-
                 BooksAdapter adapter = new BooksAdapter(books, MainActivity.this);
                 recyclerView.setAdapter(adapter);
                 tv_error.setVisibility(View.GONE);
@@ -167,5 +187,6 @@ return false;
     public void online(){
         tv_error.setVisibility(View.GONE);
         error_message.setVisibility(View.GONE);
+
     }
 }
