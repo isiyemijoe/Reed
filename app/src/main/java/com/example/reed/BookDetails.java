@@ -1,20 +1,14 @@
 package com.example.reed;
 
+import android.os.Bundle;
+import android.transition.Fade;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.os.Bundle;
-import android.view.Gravity;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.bumptech.glide.Glide;
-import com.squareup.picasso.Picasso;
-
-import java.util.Date;
 
 public class BookDetails extends AppCompatActivity {
 ImageView view;
@@ -30,7 +24,17 @@ TextView details;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_details);
+
+        Fade fade = new Fade();
+        View decor = getWindow().getDecorView();
+        fade.excludeTarget(decor.findViewById(R.id.action_bar_container), true);
+        fade.excludeTarget(android.R.id.statusBarBackground, true);
+        fade.excludeTarget(android.R.id.navigationBarBackground, true);
+        getWindow().setEnterTransition(fade);
+        getWindow().setEnterTransition(fade);
+
         Book book = getIntent().getParcelableExtra("Book");
+        setTitle(book.title);
         initialize();
         populateViews(book);
     }

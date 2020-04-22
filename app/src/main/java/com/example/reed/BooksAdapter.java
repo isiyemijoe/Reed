@@ -1,8 +1,8 @@
 package com.example.reed;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,8 +10,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 
 public class BooksAdapter extends RecyclerView.Adapter<BooksAdapter.myViewHolder>{
@@ -64,9 +68,11 @@ public class BooksAdapter extends RecyclerView.Adapter<BooksAdapter.myViewHolder
             int position = getAdapterPosition();
             Book selectedBook = mData.get(position);
             Intent intent = new Intent(itemView.getContext() , BookDetails.class);
+            ActivityOptionsCompat options = ActivityOptionsCompat.
+                    makeSceneTransitionAnimation((Activity) itemView.getContext(), thumbnail, ViewCompat.getTransitionName(thumbnail));
         intent.putExtra("Book", selectedBook);
         intent.putExtra("imageUrl", selectedBook.thumbnail);
-            itemView.getContext().startActivity(intent);
+            itemView.getContext().startActivity(intent, options.toBundle());
         }
     }
 
